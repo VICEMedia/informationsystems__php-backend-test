@@ -1,0 +1,43 @@
+version: '3'
+
+networks:
+  default:
+
+services:
+
+  shell:
+    container_name: backend-test-shell
+    image: backend-test-php
+    build:
+      context: .
+      dockerfile: .docker/workspace.Dockerfile
+    command: bash
+    working_dir: /var/www/backend-test
+    volumes:
+      - ./:/var/www/backend-test:delegated
+    depends_on:
+      - mysql
+    networks:
+      - default
+
+  test:
+    image: backend-test-php
+    command: vendor/bin/phpunit
+    working_dir: /var/www/backend-test
+    volumes:
+      - ./:/var/www/backend-test:delegated
+    depends_on:
+      - mysql
+    networks:
+      - default
+
+  mysql:
+    container_name: backend-test-mysql
+    image: mysql:5.7
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_DATABASE: backend-test
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - default
